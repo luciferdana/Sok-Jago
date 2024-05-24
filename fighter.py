@@ -1,31 +1,67 @@
 import pygame
+from abc import ABC, abstractmethod
 
-class Fighter():
-    def __init__(self, pemain, x, y, data, sprite_sheet, animation_steps, flip, sound_fx):
+class AbstrakFighter(ABC):
+    def __init__(self, pemain, x, y, data, sprite_sheet, animation_steps, flip, sound_fx, attribute):
         self.pemain = pemain
         self.size = data[0] #ukuran gambar frame karakter
         self.image_scale = data[1] #menyimpan skala gambar
         self.offset = data[2] #menyimpan variabel x dan y untuk membenarkan posisi pemain
 
-        self.rectangle = pygame.Rect((x, y, 80, 100))
+        self.rectangle = pygame.Rect((x, y, 80, 100)) #membuat hitbox pemain
         self.jump = False #atribut untuk melihat apakah pemain sedang melompat atau tidak
         self.vel_y = 0 #kecepatan saat melompat
-        self.running = False
+
+        self.running = False #apakah kondisi karakter sedang berlari
+        self.attack_cooldown = 0 #agar pemain tidak bisa spam attack terus-menerus
+
+        self.speed = attribute[0] #kecepatan karakter
+        self.cd = attribute[1] #attribute cooldown yang dimiliki oleh karakternya
+        self.damage = attribute[2] #attribute damage unik setiap karakter
+        self.health = attribute[3] #nyawa pemain
 
         self.attack = 0 #jenis attack
-        self.attack_cooldown = 0 #agar pemain tidak bisa spam attack terus-menerus
         self.attacking = False #untuk memeriksa apakah sedang menyerang atau tidak
-        self.hit = False
-        self.health = 10 #nyawa pemain
+        self.hit = False #apakah kondisi karakter sedang terkena serangan
+        
         self.flip = flip #membalikkan arah serangan pemain dengan lokasi musuh sehingga serangan pemain pasti mengarah ke musuh
-
         self.animation_lists = self.load_images(sprite_sheet, animation_steps) #memanggil fungsi load images agar animasi bisa berjalan
+
         self.action = 0 #sebagai variabel untuk menentukan aksi apa yang dilakukan pemain, lalu nilai digunakan untuk menjalankan animasi yang sesuai
         self.frame_index = 0 #berguna sebagai index untuk memindahkan frame animasi
         self.image = self.animation_lists[self.action][self.frame_index] #untuk menunjukkan animasi yang sesuai aksi dan frame-nya
+
         self.time = pygame.time.get_ticks() #mengambil waktu
-        self.alive = True
+        self.alive = True #apakah pemain masih hidup 
         self.sound_fx = sound_fx #menyimpan sound effect
+
+    @abstractmethod
+    def load_images(self):
+        pass
+
+    @abstractmethod
+    def move(self):
+        pass
+
+    @abstractmethod
+    def update(self):
+        pass
+
+    @abstractmethod
+    def performed_attack(self):
+        pass
+
+    @abstractmethod
+    def update_action(self):
+        pass
+
+    @abstractmethod
+    def draw(self):
+        pass
+
+class Fighter(AbstrakFighter):
+    def __init__(self, pemain, x, y, data, sprite_sheet, animation_steps, flip, sound_fx, attribute):
+        super().__init__(pemain, x, y, data, sprite_sheet, animation_steps, flip, sound_fx, attribute)
 
     #fungsi load images untuk animasi
     def load_images(self, sprite_sheet, animation_steps):
@@ -42,7 +78,6 @@ class Fighter():
 
     #fungsi agar karakter bisa bergerak
     def move(self, Screen_Width, Screen_Height, surface, target, round_over):
-        Speed = 12 
         Gravity = 2
         dx = 0 #dx dy adalah perubahan koordinat
         dy = 0
@@ -58,10 +93,10 @@ class Fighter():
             if self.pemain == 1:
                 #movement
                 if key[pygame.K_a]:
-                    dx = -Speed
+                    dx = -self.speed
                     self.running = True
                 if key[pygame.K_d]:
-                    dx = Speed
+                    dx = self.speed
                     self.running = True
 
                 #melompat
@@ -79,10 +114,10 @@ class Fighter():
             elif self.pemain == 2:
                 #movement
                 if key[pygame.K_j]:
-                    dx = -Speed
+                    dx = -self.speed
                     self.running = True
                 if key[pygame.K_l]:
-                    dx = Speed
+                    dx = self.speed
                     self.running = True
 
                 #melompat
@@ -107,6 +142,7 @@ class Fighter():
         #memastikan karakter pemain tetap berada pada layar di bagian kiri
         if self.rectangle.left + dx < 0:
             dx = -self.rectangle.left
+
         #memastikan karakter pemain tetap berada pada layar di bagian kanan
         if self.rectangle.right + dx > Screen_Width:
             dx = Screen_Width - self.rectangle.right
@@ -159,9 +195,9 @@ class Fighter():
 
             #jika pemain diserang, serangan pemain digagalkan
             self.attacking = False
-            self.attack_cooldown = 20
+            self.attack_cooldown = self.cd
 
-        timer = 50
+        timer = 55
         #milisekon per frame
         self.image = self.animation_lists[self.action][self.frame_index]
 
@@ -187,16 +223,16 @@ class Fighter():
     #mendefinisikan fungsi menyerang agar pemain bisa menyerang musuh
     def performed_attack(self, surface, target):
         #membuat dan menampilkan sebuah bentuk sebagai senjata
-        attacking_rectangle = pygame.Rect(self.rectangle.centerx - (2 * self.rectangle.width * self.flip), self.rectangle.y, 2 * self.rectangle.width, self.rectangle.height)
+        attacking_rectangle = pygame.Rect(self.rectangle.centerx - (self.rectangle.width * self.flip), self.rectangle.y, 2 * self.rectangle.width, self.rectangle.height)
 
         #pemain boleh menyerang ketika sedang tidak cooldown
         if self.attack_cooldown == 0 :
             self.attacking = True #kondisi pemain apakah sedang menyerang atau tidak
             self.sound_fx.play()
             if attacking_rectangle.colliderect(target.rectangle):
-                target.health -= 10
+                target.health -= self.damage
                 target.hit = True
-        #pygame.draw.rect(surface, (0,255,0), attacking_rectangle) hapus
+        #pygame.draw.rect(surface, (0,255,0), attacking_rectangle)
 
     def update_action(self, new_action):
         #mengecek apakah aksi berbeda dengan sebelumnya

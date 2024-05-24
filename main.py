@@ -1,6 +1,8 @@
+from pickle import FALSE
 import pygame
-from fighter import Fighter
+import fighter
 from pygame import mixer
+import health_bar
 
 try:
     pygame.init()
@@ -28,8 +30,11 @@ White = (255, 255, 255)
 
 # Define game variables
 MENU = True
-PLAYER1_CHARACTER_MENU = True
-PLAYER2_CHARACTER_MENU = True
+PLAYER_CHARACTER_MENU = False
+PLAYER1_NAME = ""
+PLAYER2_NAME = ""
+VICTORY = ""
+PLAYER1_SELECTED = False
 BACKGROUND_MENU = False
 PAUSE_MENU = False
 END_MENU = False
@@ -41,30 +46,39 @@ score = [0, 0]
 round_over = False
 round_over_cooldown = 2000
 
-# Define player variables
-pemain1_size = 162
-pemain1_scale = 4
-pemain1_offset = [72, 56]
+# Membuat variabel pemain
+pemain1_size = 128
+pemain1_scale = 1.75
+pemain1_offset = [25, 40]
 pemain1_data = [pemain1_size, pemain1_scale, pemain1_offset]
 
-pemain2_size = 250
-pemain2_scale = 3
-pemain2_offset = [112, 107]
+pemain2_size = 128
+pemain2_scale = 1.75
+pemain2_offset = [25, 40]
 pemain2_data = [pemain2_size, pemain2_scale, pemain2_offset]
+
+'''Membuat atribut unik setiap karakter
+setiap atribut disusun dengan urutan: speed, cooldown, damage, health'''
+atr_agus = [10, 20, 10, 100]
+atr_samson = [7, 25, 8, 140]
+atr_ica = [15, 15, 15, 70]
 
 # Load music and sound effects
 pygame.mixer.music.load('assets/audio/music.mp3')
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1, 0.0, 5000)
 
-warrior_fx = pygame.mixer.Sound('assets/audio/sword.wav')
-wizard_fx = pygame.mixer.Sound('assets/audio/magic.wav')
-warrior_fx.set_volume(0.4)
-wizard_fx.set_volume(0.5)
+ica_fx = pygame.mixer.Sound('assets/audio/ica_fx.mp3')
+agus_fx = pygame.mixer.Sound('assets/audio/agus_fx.mp3')
+samson_fx = pygame.mixer.Sound('assets/audio/samson_fx.mp3')
+ica_fx.set_volume(0.5)
+agus_fx.set_volume(0.5)
+samson_fx.set_volume(0.5)
 
-# Load images
+# Load gambar gambar
 bg_image = pygame.image.load("assets/images/background/background.png").convert_alpha()
-choose_bg = pygame.image.load("assets/images/background/choose_player_bg.png").convert_alpha()
+choose1_bg = pygame.image.load("assets/images/background/choose1.png").convert_alpha()
+choose2_bg = pygame.image.load("assets/images/background/choose2.png").convert_alpha()
 arena1 = pygame.image.load("assets/images/background/arena1.png").convert_alpha()
 arena2 = pygame.image.load("assets/images/background/arena2.png").convert_alpha()
 arena_bg = pygame.image.load("assets/images/background/arena_bg.png").convert_alpha()
@@ -76,16 +90,15 @@ menu_bg = pygame.transform.scale(menu_bg, (1000, 600))
 arena1 = pygame.transform.scale(arena1, (1000, 600))
 arena2 = pygame.transform.scale(arena2, (1000, 600))
 
-# Load victory image
-victory_img = pygame.image.load('assets/images/icons/victory.png').convert_alpha()
+# Load spritesheets untuk animation
+agus_sheet = pygame.image.load('assets/images/character/agus.png')
+samson_sheet = pygame.image.load('assets/images/character/samson.png')
+ica_sheet = pygame.image.load('assets/images/character/ica.png')
 
-# Load spritesheets for animation
-pemain1_sheet = pygame.image.load('assets/images/pemain1/warrior.png')
-pemain2_sheet = pygame.image.load('assets/images/pemain2/wizard.png')
-
-# Define animation steps
-pemain1_animation_steps = [10, 8, 1, 7, 7, 3, 7]
-pemain2_animation_steps = [8, 8, 1, 8, 8, 3, 7]
+# Define animation steps (berapa frame-nya)
+agus_animation_steps = [6, 8, 10, 4, 3, 3, 3]
+samson_animation_steps = [6, 8, 12, 5, 3, 2, 4]
+ica_animation_steps = [6, 8, 12, 6 , 4, 2 ,3]
 
 # Load fonts
 count_font = pygame.font.Font('assets/fonts/Act_Of_Rejection.ttf', 100)
@@ -96,23 +109,15 @@ reset_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 30)
 menu_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 30)
 smaller_menu_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 27)
 
-
+#Fungsi untuk membuat teks lebih mudah
 def draw_text(text, font, color, x, y):
     img = font.render(text, True, color)
     screen.blit(img, (x, y))
 
+#Fungsi untuk menampilkan background
 def draw_bg():
     scaled_bg = pygame.transform.scale(bg_image, (Screen_Width, Screen_Height))
     screen.blit(scaled_bg, (0, 0))
-
-def draw_health_bar(health, x, y):
-    ratio = health / 100
-    pygame.draw.rect(screen, White, (x - 2, y - 2, 405, 34))
-    pygame.draw.rect(screen, Red, (x, y, 400, 30))
-    pygame.draw.rect(screen, Yellow, (x, y, 400 * ratio, 30))
-
-pemain1 = Fighter(1, 200, 390, pemain1_data, pemain1_sheet, pemain1_animation_steps, False, warrior_fx)
-pemain2 = Fighter(2, 700, 390, pemain2_data, pemain2_sheet, pemain2_animation_steps, True, wizard_fx)
 
 run = True
 while run:
@@ -123,42 +128,71 @@ while run:
         draw_text("Press Enter to Start", smaller_menu_font, (0, 0, 0), 320, 385)
         key = pygame.key.get_pressed()
         if key[pygame.K_RETURN]:
-            BACKGROUND_MENU = True
             MENU = False
             PAUSE_MENU = False
+            PLAYER_CHARACTER_MENU = True
         if END_MENU:
             if key[pygame.K_RETURN]:
                 run = False
 
-    elif PLAYER1_CHARACTER_MENU:
-        screen.blit(choose_bg, (0, 0))
-        draw_text("Player 1: Choose Your Character", menu_font, Red, 200, 200)
+    elif PLAYER_CHARACTER_MENU:
+        if not PLAYER1_SELECTED:
+            screen.blit(choose1_bg, (0, 0))
 
-        key = pygame.key.get_pressed()
-        if key[pygame.K_1]:
-            pemain1 = Fighter(1, 200, 390, pemain1_data, pemain1_sheet, pemain1_animation_steps, False, warrior_fx)
-            PLAYER1_CHARACTER_MENU = False
-            PLAYER2_CHARACTER_MENU = True
+            key = pygame.key.get_pressed()
+            
+            if key[pygame.K_1]:
+                pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, samson_sheet, samson_animation_steps, False, samson_fx, atr_samson)
+                pemain1_bantuan = [samson_sheet, samson_animation_steps, samson_fx]
+                pemain1_health_bar = health_bar.HealthBarSamson(pemain1.health)
+                PLAYER1_SELECTED = True
+                PLAYER1_NAME = "Samson"
 
-        elif key[pygame.K_2]:
-            pemain1 = Fighter(1, 200, 390, pemain1_data, pemain1_sheet, pemain1_animation_steps, False, wizard_fx)
-            PLAYER1_CHARACTER_MENU = False
-            PLAYER2_CHARACTER_MENU = True
+            elif key[pygame.K_2]:
+                pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, ica_sheet, ica_animation_steps,False, ica_fx, atr_ica)
+                pemain1_bantuan = [ica_sheet, ica_animation_steps, ica_fx]
+                pemain1_health_bar = health_bar.HealthBarIca(pemain1.health)
+                PLAYER1_SELECTED = True
+                PLAYER1_NAME = "Ica"
+                
+            elif key[pygame.K_3]:
+                pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, agus_sheet, agus_animation_steps, False, agus_fx, atr_agus)
+                pemain1_bantuan = [agus_sheet, agus_animation_steps, agus_fx]
+                pemain1_health_bar = health_bar.HealthBarAgus(pemain1.health)
+                PLAYER1_SELECTED = True
+                PLAYER1_NAME = "Agus"
+                
+        else:
+            screen.blit(choose2_bg, (0, 0))
 
-    elif PLAYER2_CHARACTER_MENU:
-        screen.blit(choose_bg, (0, 0))
-        draw_text("Player 2: Choose Your Character", menu_font, Red, 200, 200)
+            key = pygame.key.get_pressed()
+            
+            if key[pygame.K_q]:
+                pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, samson_sheet, samson_animation_steps, True, samson_fx, atr_samson)
+                pemain2_bantuan = [samson_sheet, samson_animation_steps, samson_fx]
+                pemain2_health_bar = health_bar.HealthBarSamson(pemain2.health)
+                BACKGROUND_MENU = True
+                PLAYER_CHARACTER_MENU = False
+                PLAYER2_NAME = "Samson"
+                
 
-        key = pygame.key.get_pressed()
-        if key[pygame.K_1]:
-            pemain2 = Fighter(2, 700, 390, pemain2_data, pemain2_sheet, pemain2_animation_steps, True, warrior_fx)
-            PLAYER2_CHARACTER_MENU = False
-            BACKGROUND_MENU = True
+            elif key[pygame.K_w]:
+                pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, ica_sheet, ica_animation_steps, True, ica_fx, atr_ica)
+                pemain2_bantuan = [ica_sheet, ica_animation_steps, ica_fx]
+                pemain2_health_bar = health_bar.HealthBarIca(pemain2.health)
+                BACKGROUND_MENU = True
+                PLAYER_CHARACTER_MENU = False
+                PLAYER2_NAME = "Ica"
 
-        elif key[pygame.K_2]:
-            pemain2 = Fighter(2, 700, 390, pemain2_data, pemain2_sheet, pemain2_animation_steps, True, wizard_fx)
-            PLAYER2_CHARACTER_MENU = False
-            BACKGROUND_MENU = True
+            elif key[pygame.K_e]:
+                pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, agus_sheet, agus_animation_steps, True, agus_fx, atr_agus)
+                pemain2_bantuan = [agus_sheet, agus_animation_steps, agus_fx]
+                pemain2_health_bar = health_bar.HealthBarAgus(pemain2.health)
+                BACKGROUND_MENU = True
+                PLAYER_CHARACTER_MENU = False
+                PLAYER2_NAME = "Agus"
+
+
 
     elif BACKGROUND_MENU:
         screen.blit(arena_bg, (0, 0)) 
@@ -182,7 +216,6 @@ while run:
         if key[pygame.K_SPACE]:
             pygame.quit()
 
-
     else:        
         screen.blit(current_background, (0, 0))
 
@@ -192,12 +225,14 @@ while run:
         pemain2.draw(screen)
         pemain1.draw(screen)
 
-        #
-        draw_health_bar(pemain1.health, 20, 20)
-        draw_health_bar(pemain2.health, 580, 20)
-        draw_text("P1: " + str(score[0]), score_font, Red, 20, 60)
-        draw_text("P2: " + str(score[1]), score_font, Red, 580, 60)
-
+        pemain1_health_bar.draw(screen, 20, 20)
+        pemain2_health_bar.draw(screen, 580, 20)
+        pemain1_health_bar.update(pemain1.health)
+        pemain2_health_bar.update(pemain2.health)
+        #draw_health_bar(pemain1.health, 20, 20)
+        #draw_health_bar(pemain2.health, 580, 20)
+        draw_text("P1 " + PLAYER1_NAME + " : " + str(score[0]), score_font, Red, 20, 60)
+        draw_text("P2 " + PLAYER2_NAME + " : " + str(score[1]), score_font, Red, 580, 60)
         # Inisialisasi variabel game_over sebelum loop game
         game_over = False
 
@@ -212,8 +247,6 @@ while run:
                     intro -= 1
                     last_count_update = pygame.time.get_ticks()
 
-
-
         #
         pemain1.update()
         pemain2.update()
@@ -221,6 +254,8 @@ while run:
         pemain1.draw(screen)
         pemain2.draw(screen)
 
+        print(pemain1_health_bar.health)
+        print(pemain2_health_bar.health)
         #
         if round_over == False:
             if pemain1.alive == False:
@@ -236,18 +271,35 @@ while run:
                 draw_text('Ronde Selesai', ronde_font, Red, 175, 230)
             if pygame.time.get_ticks() - round_over_time > round_over_cooldown:
                 round_over = False
-                pemain1 = Fighter(1, 200, 390, pemain1_data, pemain1_sheet, pemain1_animation_steps, False, warrior_fx)
-                pemain2 = Fighter(2, 700, 390, pemain2_data, pemain2_sheet, pemain2_animation_steps, True, wizard_fx)
+                if PLAYER1_NAME == 'Agus':
+                    pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, pemain1_bantuan[0], pemain1_bantuan[1], False, pemain1_bantuan[2], atr_agus)
+                elif PLAYER1_NAME == 'Ica':
+                    pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, pemain1_bantuan[0], pemain1_bantuan[1], False, pemain1_bantuan[2], atr_ica)
+                elif PLAYER1_NAME == 'Samson':
+                    pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, pemain1_bantuan[0], pemain1_bantuan[1], False, pemain1_bantuan[2], atr_samson)
+
+                if PLAYER2_NAME == 'Agus':
+                    pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, pemain2_bantuan[0], pemain2_bantuan[1], True, pemain2_bantuan[2], atr_agus)
+                elif PLAYER2_NAME == 'Ica':
+                    pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, pemain2_bantuan[0], pemain2_bantuan[1], True, pemain2_bantuan[2], atr_ica)
+                elif PLAYER2_NAME == 'Samson':
+                    pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, pemain2_bantuan[0], pemain2_bantuan[1], True, pemain2_bantuan[2], atr_samson)
   
         if score[0] >= 3 or score[1] >= 3:
-            draw_text('VICTORY', victory_font, Red, 250, 170)
-            draw_text('Tekan "R" untuk bermain kembali', reset_font, Red, 200, 120)
+            draw_text("P1 " +'VICTORY', victory_font, Red, 200, 170)
+
+            if score[0] >= 3:
+                VICTORY = "P1"
+            else:
+                VICTORY = "P2"
+
+            draw_text('Tekan "Enter" untuk bermain kembali', reset_font, Red, 170, 120)
             game_over = True  # Menandakan bahwa permainan telah berakhir
 
       # Ketika permainan selesai dan pemain memilih untuk memulai kembali
         if game_over:
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_r]:
+            if keys[pygame.K_RETURN]:
                 # Atur ulang kondisi permainan
                 score = [0, 0]
                 game_over = False
@@ -257,7 +309,6 @@ while run:
         if event.type == pygame.QUIT:
             run = False
     key = pygame.key.get_pressed()
-
     if key[pygame.K_ESCAPE]:
         PAUSE_MENU = True
 
