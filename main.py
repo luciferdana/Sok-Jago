@@ -238,7 +238,6 @@ while run:
             MENU = False
     
     elif PAUSE_MENU:
-        print(pygame.mouse.get_pos())
         screen.blit(option_bg, (0, 0))
         draw_text_with_outline("Press Enter to Resume", menu_font, Black, White , 240, 250)
         draw_text_with_outline("Press H for Game Guide", menu_font, Black, White, 230, 300)
@@ -251,12 +250,10 @@ while run:
         key = pygame.key.get_pressed()
         if key[pygame.K_RETURN]:
             PAUSE_MENU = False
+            GAME_GUIDE = False
         elif key[pygame.K_h]:
             PAUSE_MENU = False
             GAME_GUIDE = True
-        #elif key[pygame.K_ENTER]:
-            #run = False  # Change this line to set run to False
-            GAME_GUIDE = True 
         elif key[pygame.K_SPACE]:
             run =False
 
@@ -266,6 +263,7 @@ while run:
         key = pygame.key.get_pressed()
         if key[pygame.K_ESCAPE]:
             GAME_GUIDE = False
+            PAUSE_MENU = True
 
 
     else:        
@@ -305,8 +303,6 @@ while run:
         pemain1.draw(screen)
         pemain2.draw(screen)
 
-        print(pemain1_health_bar.health)
-        print(pemain2_health_bar.health)
         #
         if round_over == False:
             if pemain1.alive == False:
