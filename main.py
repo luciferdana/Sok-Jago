@@ -86,6 +86,7 @@ arena2 = pygame.image.load("assets/images/background/arena2.png").convert_alpha(
 arena_bg = pygame.image.load("assets/images/background/arena_bg.png").convert_alpha()
 menu_bg = pygame.image.load("assets/images/background/menu_bg.png").convert_alpha()
 option_bg = pygame.image.load("assets/images/background/option_bg.png").convert_alpha()
+guide_bg = pygame.image.load("assets/images/background/guide_bg.png").convert_alpha()
 
 #ukuran gambar
 menu_bg = pygame.transform.scale(menu_bg, (1000, 600))
@@ -95,6 +96,7 @@ choose1_bg = pygame.transform.scale(choose1_bg, (1000, 600))
 choose2_bg = pygame.transform.scale(choose2_bg, (1000, 600))
 arena_bg=pygame.transform.scale(arena_bg ,(1000,600))
 option_bg=pygame.transform.scale(option_bg, (1000, 600))
+guide_bg=pygame.transform.scale(guide_bg,(1000, 600))
 
 
 # Load spritesheets untuk animation
@@ -237,27 +239,23 @@ while run:
         screen.blit(option_bg, (0, 0))
         draw_text_with_outline("Press Enter to Resume", menu_font, Black, White , 240, 250)
         draw_text_with_outline("Press H for Game Guide", menu_font, Black, White, 230, 300)
-        draw_text_with_outline("Press Esc to Quit", menu_font, Black, White, 300, 350)
+        draw_text_with_outline("Press Space to Quit", menu_font, Black, White, 300, 350)
         key = pygame.key.get_pressed()
         if key[pygame.K_RETURN]:
             PAUSE_MENU = False
         elif key[pygame.K_h]:
             PAUSE_MENU = False
-            GAME_GUIDE = True
-        elif key[pygame.K_ESCAPE]:
-            run = False  # Change this line to set run to False
+            GAME_GUIDE = True 
+        elif key[pygame.K_SPACE]:
+            run =False
 
     elif GAME_GUIDE:
-        screen.blit(option_bg, (0, 0))
-        draw_text_with_outline("Game Guide", menu_font, Black, White, 400, 50)
-        draw_text("1. Use arrow keys to move", smaller_menu_font, White, 100, 150)
-        draw_text("2. Use 'A' key for attack", smaller_menu_font, White, 100, 200)
-        draw_text("3. Use 'S' key for special move", smaller_menu_font, White, 100, 250)
+        screen.blit(guide_bg, (0, 0))
         draw_text_with_outline("Press Esc to Return to Pause Menu", smaller_menu_font, Black, White, 250, 500)
         key = pygame.key.get_pressed()
         if key[pygame.K_ESCAPE]:
             GAME_GUIDE = False
-            PAUSE_MENU = True
+
 
     else:        
         screen.blit(current_background, (0, 0))
