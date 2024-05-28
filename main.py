@@ -3,6 +3,7 @@ import pygame
 import fighter
 from pygame import mixer
 import health_bar
+import sliders
 
 try:
     pygame.init()
@@ -59,8 +60,8 @@ pemain2_scale = 1.75
 pemain2_offset = [25, 40]
 pemain2_data = [pemain2_size, pemain2_scale, pemain2_offset]
 
-'''Membuat atribut unik setiap karakter
-setiap atribut disusun dengan urutan: speed, cooldown, damage, health'''
+#Membuat atribut unik setiap karakter
+#setiap atribut disusun dengan urutan: speed, cooldown, damage, health
 atr_agus = [10, 20, 10, 100]
 atr_samson = [7, 25, 8, 140]
 atr_ica = [15, 15, 15, 70]
@@ -68,7 +69,7 @@ atr_ica = [15, 15, 15, 70]
 # Load music and sound effects
 pygame.mixer.music.load('assets/audio/music.mp3')
 pygame.mixer.music.set_volume(0.5)
-pygame.mixer.music.play(-1, 0.0, 5000)
+pygame.mixer.music.play(-1, 0.0, 6000)
 
 ica_fx = pygame.mixer.Sound('assets/audio/ica_fx.mp3')
 agus_fx = pygame.mixer.Sound('assets/audio/agus_fx.mp3')
@@ -98,6 +99,9 @@ arena_bg=pygame.transform.scale(arena_bg ,(1000,600))
 option_bg=pygame.transform.scale(option_bg, (1000, 600))
 guide_bg=pygame.transform.scale(guide_bg,(1000, 600))
 
+#membuat sliders untuk volume
+bg_slider = sliders.Slider(x=250, y=440, length=200, height=10, knob_radius=10)
+fx_slider = sliders.Slider(x= 600, y= 440, length= 200, height= 10, knob_radius=10)
 
 # Load spritesheets untuk animation
 agus_sheet = pygame.image.load('assets/images/character/agus.png')
@@ -221,8 +225,6 @@ while run:
                 PLAYER_CHARACTER_MENU = False
                 PLAYER2_NAME = "Agus"
 
-
-
     elif BACKGROUND_MENU:
         screen.blit(arena_bg, (0, 0)) 
         key = pygame.key.get_pressed()
@@ -234,17 +236,26 @@ while run:
             current_background = arena2
             BACKGROUND_MENU = False
             MENU = False
-
+    
     elif PAUSE_MENU:
+        print(pygame.mouse.get_pos())
         screen.blit(option_bg, (0, 0))
         draw_text_with_outline("Press Enter to Resume", menu_font, Black, White , 240, 250)
         draw_text_with_outline("Press H for Game Guide", menu_font, Black, White, 230, 300)
+        draw_text_with_outline("Press Esc to Quit", menu_font, Black, White, 300, 350)
+        draw_text_with_outline("Background Music", smaller_menu_font, Black, White, 210, 400)
+        draw_text_with_outline("Sound Effects", smaller_menu_font, Black, White, 585, 400)
+        bg_slider.draw(screen)
+        fx_slider.draw(screen)
         draw_text_with_outline("Press Space to Quit", menu_font, Black, White, 300, 350)
         key = pygame.key.get_pressed()
         if key[pygame.K_RETURN]:
             PAUSE_MENU = False
         elif key[pygame.K_h]:
             PAUSE_MENU = False
+            GAME_GUIDE = True
+        #elif key[pygame.K_ENTER]:
+            #run = False  # Change this line to set run to False
             GAME_GUIDE = True 
         elif key[pygame.K_SPACE]:
             run =False
@@ -270,8 +281,7 @@ while run:
         pemain2_health_bar.draw(screen, 580, 20)
         pemain1_health_bar.update(pemain1.health)
         pemain2_health_bar.update(pemain2.health)
-        #draw_health_bar(pemain1.health, 20, 20)
-        #draw_health_bar(pemain2.health, 580, 20)
+
         draw_text_with_outline("P1 " + PLAYER1_NAME + " : " + str(score[0]), score_font, Black, White, 20, 60)
         draw_text_with_outline("P2 " + PLAYER2_NAME + " : " + str(score[1]), score_font, Black, White, 580, 60)
         # Inisialisasi variabel game_over sebelum loop game
@@ -348,6 +358,18 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        else:
+            bg_slider.handle_event(event)
+            fx_slider.handle_event(event)
+
+    volume_bg = bg_slider.get_volume()
+    pygame.mixer.music.set_volume(volume_bg)
+
+    volume_fx = fx_slider.get_volume()
+    ica_fx.set_volume(volume_fx)
+    samson_fx.set_volume(volume_fx)
+    agus_fx.set_volume(volume_fx)
+
     key = pygame.key.get_pressed()
     if key[pygame.K_ESCAPE]:
         PAUSE_MENU = True
