@@ -242,7 +242,7 @@ while run:
         screen.blit(option_bg, (0, 0))
         draw_text_with_outline("Press Enter to Resume", menu_font, Black, White , 240, 250)
         draw_text_with_outline("Press H for Game Guide", menu_font, Black, White, 230, 300)
-        draw_text_with_outline("Press Esc to Quit", menu_font, Black, White, 300, 350)
+        draw_text_with_outline("Press Space to Quit", menu_font, Black, White, 300, 350)
         draw_text_with_outline("Background Music", smaller_menu_font, Black, White, 210, 400)
         draw_text_with_outline("Sound Effects", smaller_menu_font, Black, White, 585, 400)
         bg_slider.draw(screen)
