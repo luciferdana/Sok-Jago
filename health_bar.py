@@ -1,3 +1,4 @@
+from re import S
 import pygame
 from abc import ABC, abstractmethod
 
@@ -21,7 +22,8 @@ class AbstrakHealthbar(ABC):
 
 class HealthBarAgus(AbstrakHealthbar):
     def __init__(self, health):
-        super().__init__(health)
+        super()
+        super.__init__(health)
         self.full_health = int(health)
         self.ratio = self.health / self.full_health
 
