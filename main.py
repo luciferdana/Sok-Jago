@@ -1,4 +1,4 @@
-from pickle import FALSE
+from pickle import FALSE, TRUE
 import pygame
 import fighter
 from pygame import mixer
@@ -24,6 +24,7 @@ clock = pygame.time.Clock()
 FPS = 60
 
 # Define colors
+Black = (0, 0, 0)
 Yellow = (255, 255, 0)
 Red = (255, 0, 0)
 White = (255, 255, 255)
@@ -37,6 +38,7 @@ VICTORY = ""
 PLAYER1_SELECTED = False
 BACKGROUND_MENU = False
 PAUSE_MENU = False
+GAME_GUIDE = False
 END_MENU = False
 
 # Define game variables
@@ -89,6 +91,11 @@ option_bg = pygame.image.load("assets/images/background/option_bg.png").convert_
 menu_bg = pygame.transform.scale(menu_bg, (1000, 600))
 arena1 = pygame.transform.scale(arena1, (1000, 600))
 arena2 = pygame.transform.scale(arena2, (1000, 600))
+choose1_bg = pygame.transform.scale(choose1_bg, (1000, 600))
+choose2_bg = pygame.transform.scale(choose2_bg, (1000, 600))
+arena_bg=pygame.transform.scale(arena_bg ,(1000,600))
+option_bg=pygame.transform.scale(option_bg, (1000, 600))
+
 
 # Load spritesheets untuk animation
 agus_sheet = pygame.image.load('assets/images/character/agus.png')
@@ -102,17 +109,37 @@ ica_animation_steps = [6, 8, 12, 6 , 4, 2 ,3]
 
 # Load fonts
 count_font = pygame.font.Font('assets/fonts/Act_Of_Rejection.ttf', 100)
-score_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 30)
-victory_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 100)
-ronde_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 80)
-reset_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 30)
-menu_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 30)
-smaller_menu_font = pygame.font.Font('assets/fonts/AAbsoluteEmpire-EaXpg.ttf', 27)
+score_font = pygame.font.Font('assets/fonts/Akira Expanded Demo.otf', 30)
+victory_font = pygame.font.Font('assets/fonts/Akira Expanded Demo.otf', 80)
+ronde_font = pygame.font.Font('assets/fonts/Akira Expanded Demo.otf', 60)
+reset_font = pygame.font.Font('assets/fonts/Akira Expanded Demo.otf', 27)
+menu_font = pygame.font.Font('assets/fonts/Akira Expanded Demo.otf', 30)
+smaller_menu_font = pygame.font.Font('assets/fonts/Akira Expanded Demo.otf', 20)
 
 #Fungsi untuk membuat teks lebih mudah
 def draw_text(text, font, color, x, y):
     img = font.render(text, True, color)
     screen.blit(img, (x, y))
+
+# Fungsi untuk menggambar teks dengan outline
+def draw_text_with_outline(text, font, text_color, outline_color, x, y):
+    # Render teks dengan warna outline
+    text_surface = font.render(text, True, outline_color)
+    # Render teks dengan warna asli
+    text_surface_base = font.render(text, True, text_color)
+
+    # Gambar teks outline sedikit bergeser ke 8 arah untuk membuat outline
+    screen.blit(text_surface, (x - 2, y - 2))
+    screen.blit(text_surface, (x + 2, y - 2))
+    screen.blit(text_surface, (x - 2, y + 2))
+    screen.blit(text_surface, (x + 2, y + 2))
+    screen.blit(text_surface, (x - 2, y))
+    screen.blit(text_surface, (x + 2, y))
+    screen.blit(text_surface, (x, y - 2))
+    screen.blit(text_surface, (x, y + 2))
+
+    # Gambar teks asli di atas outline
+    screen.blit(text_surface_base, (x, y))
 
 #Fungsi untuk menampilkan background
 def draw_bg():
@@ -125,7 +152,7 @@ while run:
     
     if MENU:
         screen.blit(menu_bg, (0, 0))
-        draw_text("Press Enter to Start", smaller_menu_font, (0, 0, 0), 320, 385)
+        draw_text("Press Enter to Start", smaller_menu_font, (0, 0, 0), 320, 388)
         key = pygame.key.get_pressed()
         if key[pygame.K_RETURN]:
             MENU = False
@@ -208,13 +235,29 @@ while run:
 
     elif PAUSE_MENU:
         screen.blit(option_bg, (0, 0))
-        draw_text("Press Enter to Resume", menu_font, Red, 300, 300)
-        draw_text("Press Space to Quit", menu_font, Red, 320, 350)
+        draw_text_with_outline("Press Enter to Resume", menu_font, Black, White , 240, 250)
+        draw_text_with_outline("Press H for Game Guide", menu_font, Black, White, 230, 300)
+        draw_text_with_outline("Press Esc to Quit", menu_font, Black, White, 300, 350)
         key = pygame.key.get_pressed()
         if key[pygame.K_RETURN]:
             PAUSE_MENU = False
-        if key[pygame.K_SPACE]:
-            pygame.quit()
+        elif key[pygame.K_h]:
+            PAUSE_MENU = False
+            GAME_GUIDE = True
+        elif key[pygame.K_ESCAPE]:
+            run = False  # Change this line to set run to False
+
+    elif GAME_GUIDE:
+        screen.blit(option_bg, (0, 0))
+        draw_text_with_outline("Game Guide", menu_font, Black, White, 400, 50)
+        draw_text("1. Use arrow keys to move", smaller_menu_font, White, 100, 150)
+        draw_text("2. Use 'A' key for attack", smaller_menu_font, White, 100, 200)
+        draw_text("3. Use 'S' key for special move", smaller_menu_font, White, 100, 250)
+        draw_text_with_outline("Press Esc to Return to Pause Menu", smaller_menu_font, Black, White, 250, 500)
+        key = pygame.key.get_pressed()
+        if key[pygame.K_ESCAPE]:
+            GAME_GUIDE = False
+            PAUSE_MENU = True
 
     else:        
         screen.blit(current_background, (0, 0))
@@ -231,8 +274,8 @@ while run:
         pemain2_health_bar.update(pemain2.health)
         #draw_health_bar(pemain1.health, 20, 20)
         #draw_health_bar(pemain2.health, 580, 20)
-        draw_text("P1 " + PLAYER1_NAME + " : " + str(score[0]), score_font, Red, 20, 60)
-        draw_text("P2 " + PLAYER2_NAME + " : " + str(score[1]), score_font, Red, 580, 60)
+        draw_text_with_outline("P1 " + PLAYER1_NAME + " : " + str(score[0]), score_font, Black, White, 20, 60)
+        draw_text_with_outline("P2 " + PLAYER2_NAME + " : " + str(score[1]), score_font, Black, White, 580, 60)
         # Inisialisasi variabel game_over sebelum loop game
         game_over = False
 
@@ -242,7 +285,7 @@ while run:
             pemain2.move(Screen_Width, Screen_Height, screen, pemain1, round_over)
         else:
             if not game_over:  # Hanya jika permainan belum berakhir
-                draw_text(str(intro), count_font, Red, (Screen_Width / 2) - 40, (Screen_Height / 3) - 50)
+                draw_text_with_outline(str(intro), count_font, Black, White, (Screen_Width / 2) - 40, (Screen_Height / 3) - 50)
                 if pygame.time.get_ticks() - last_count_update >= 1000:
                     intro -= 1
                     last_count_update = pygame.time.get_ticks()
@@ -268,7 +311,7 @@ while run:
                 round_over_time = pygame.time.get_ticks()
         else:
             if score[0] < 3 and score[1] < 3:
-                draw_text('Ronde Selesai', ronde_font, Red, 175, 230)
+                draw_text_with_outline('Ronde Selesai', ronde_font, Black, White, 175, 230)
             if pygame.time.get_ticks() - round_over_time > round_over_cooldown:
                 round_over = False
                 if PLAYER1_NAME == 'Agus':
@@ -285,16 +328,15 @@ while run:
                 elif PLAYER2_NAME == 'Samson':
                     pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, pemain2_bantuan[0], pemain2_bantuan[1], True, pemain2_bantuan[2], atr_samson)
   
-        if score[0] >= 3 or score[1] >= 3:
-            draw_text("P1 " +'VICTORY', victory_font, Red, 200, 170)
+    if score[0] >= 3 or score[1] >= 3:
+        if score[0] >= 3:
+            VICTORY = "P1"
+        else:
+            VICTORY = "P2"
 
-            if score[0] >= 3:
-                VICTORY = "P1"
-            else:
-                VICTORY = "P2"
-
-            draw_text('Tekan "Enter" untuk bermain kembali', reset_font, Red, 170, 120)
-            game_over = True  # Menandakan bahwa permainan telah berakhir
+        draw_text_with_outline(VICTORY + " VICTORY", victory_font, Black, White, 200, 130)
+        draw_text_with_outline('Tekan "Enter" untuk bermain kembali', reset_font, Black, White, 120, 220)
+        game_over = True  # Menandakan bahwa permainan telah berakhir
 
       # Ketika permainan selesai dan pemain memilih untuk memulai kembali
         if game_over:
