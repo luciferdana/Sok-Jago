@@ -1,9 +1,9 @@
-import pygame
-from abc import ABC, abstractmethod
+import pygame #Pygame sebagai gui
+from abc import ABC, abstractmethod #Import untuk melakukan abstraction
 
-class AbstrakFighter(ABC):
+class AbstrakFighter(ABC): #abstraction
     def __init__(self, pemain, x, y, data, sprite_sheet, animation_steps, flip, sound_fx, attribute):
-        self.pemain = pemain
+        self.pemain = pemain #mendifinisikan player 1 atau player 2
         self.size = data[0] #ukuran gambar frame karakter
         self.image_scale = data[1] #menyimpan skala gambar
         self.offset = data[2] #menyimpan variabel x dan y untuk membenarkan posisi pemain
@@ -35,7 +35,8 @@ class AbstrakFighter(ABC):
         self.alive = True #apakah pemain masih hidup 
         self.sound_fx = sound_fx #menyimpan sound effect
 
-    @abstractmethod
+    #membuat abstract method agar harus diimplementasikan oleh keturunannya
+    @abstractmethod 
     def load_images(self):
         pass
 
@@ -62,6 +63,7 @@ class AbstrakFighter(ABC):
 class Fighter(AbstrakFighter):
     def __init__(self, pemain, x, y, data, sprite_sheet, animation_steps, flip, sound_fx, attribute):
         super().__init__(pemain, x, y, data, sprite_sheet, animation_steps, flip, sound_fx, attribute)
+        #menggunakan super untuk memanggil konstruktor dari kelas induk yaitu konstruktor AbstrakFighter
 
     #fungsi load images untuk animasi
     def load_images(self, sprite_sheet, animation_steps):
@@ -74,17 +76,18 @@ class Fighter(AbstrakFighter):
                 temp_image = pygame.transform.scale(temp_image, (self.size * self.image_scale, self.size * self.image_scale))
                 temp_image_list.append(temp_image) #list untuk menyimpan frame apa saja yang dibutuhkan
             animation_lists.append(temp_image_list)
-        return animation_lists
+        return animation_lists #mengembalikan list animasi untuk dijalankan
 
-    #fungsi agar karakter bisa bergerak
+    #fungsi agar karakter bisa bergerak dan menyerang
     def move(self, Screen_Width, Screen_Height, surface, target, round_over):
-        Gravity = 2
-        dx = 0 #dx dy adalah perubahan koordinat
-        dy = 0
-        self.running = False
-        self.attack = 0
+        Gravity = 2 #agar pemain dapat turun kembali setelah melompat
+        dx = 0 #perubahan koordinat sumbu x
+        dy = 0 #perubahaan koordinat sumbu y
 
-        #get key presses
+        self.running = False #apakah pemain sedang berlari
+        self.attack = 0 #jenis attack pemain
+
+        #mengambil key yang dipencet
         key = pygame.key.get_pressed()
 
         #memastikan pemain hanya dapat bergerak jika tidak sedang menyerang
@@ -93,10 +96,10 @@ class Fighter(AbstrakFighter):
             if self.pemain == 1:
                 #movement
                 if key[pygame.K_a]:
-                    dx = -self.speed
+                    dx = -self.speed #pemain berlari ke kiri
                     self.running = True
                 if key[pygame.K_d]:
-                    dx = self.speed
+                    dx = self.speed #pemain berlari ke kanan
                     self.running = True
 
                 #melompat
@@ -114,10 +117,10 @@ class Fighter(AbstrakFighter):
             elif self.pemain == 2:
                 #movement
                 if key[pygame.K_j]:
-                    dx = -self.speed
+                    dx = -self.speed #pemain berlari ke kiri
                     self.running = True
                 if key[pygame.K_l]:
-                    dx = self.speed
+                    dx = self.speed #pemain berlari ke kanan
                     self.running = True
 
                 #melompat
@@ -169,6 +172,7 @@ class Fighter(AbstrakFighter):
 
     #mengupdate animasi
     def update(self):
+
         #jika health pemain sudah habis, maka gunakan animasi death pemain
         if self.health <= 0:
             self.health = 0
@@ -197,6 +201,7 @@ class Fighter(AbstrakFighter):
             self.attacking = False
             self.attack_cooldown = self.cd
 
+        #menampilkan setiap frame sesuai dengan timer
         timer = 55
         #milisekon per frame
         self.image = self.animation_lists[self.action][self.frame_index]
@@ -211,11 +216,12 @@ class Fighter(AbstrakFighter):
             #jika pemain mati, akhirkan animasinya
             if self.alive == False:
                 self.frame_index = len(self.animation_lists[self.action]) - 1
-            
-            else:
-                self.frame_index = 0
+                #memastikan animasi berhenti pada akhir index terakhir
 
-                #mengecek apakah sernagan sudah dilakukan
+            else:
+                self.frame_index = 0 #memulai animasi dari awal
+
+                #mengecek apakah serangan sudah dilakukan
                 if self.action == 3 or self.action == 4:
                     self.attacking = False
                     self.attack_cooldown = 20
@@ -228,11 +234,10 @@ class Fighter(AbstrakFighter):
         #pemain boleh menyerang ketika sedang tidak cooldown
         if self.attack_cooldown == 0 :
             self.attacking = True #kondisi pemain apakah sedang menyerang atau tidak
-            self.sound_fx.play()
+            self.sound_fx.play() #jika pemain menyerang, nyalakan sound fx
             if attacking_rectangle.colliderect(target.rectangle):
                 target.health -= self.damage
                 target.hit = True
-        #pygame.draw.rect(surface, (0,255,0), attacking_rectangle)
 
     def update_action(self, new_action):
         #mengecek apakah aksi berbeda dengan sebelumnya
@@ -246,5 +251,5 @@ class Fighter(AbstrakFighter):
     #agar karakter pemain terlihat pada window dan surface adalah letak pemainnya
     def draw(self, surface):
         img = pygame.transform.flip(self.image, self.flip, False)
-        # pygame.draw.rect(surface, (0,0,255), self.rectangle) hapus
-        surface.blit(img, (self.rectangle.x - (self.offset[0] * self.image_scale), self.rectangle.y - (self.offset[1] * self.image_scale))) #laod gambar pemain sesuai dengan koordinat bentuk yang telah dibuat
+        surface.blit(img, (self.rectangle.x - (self.offset[0] * self.image_scale), self.rectangle.y - (self.offset[1] * self.image_scale))) 
+        #laod gambar pemain sesuai dengan koordinat bentuk yang telah dibuat
