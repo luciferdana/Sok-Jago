@@ -1,4 +1,3 @@
-from pickle import FALSE, TRUE
 import pygame
 import fighter
 from pygame import mixer
@@ -70,7 +69,6 @@ atr_ica = [15, 15, 15, 70]
 pygame.mixer.music.load('assets/audio/music.mp3')
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1, 0.0, 6000)
-
 ica_fx = pygame.mixer.Sound('assets/audio/ica_fx.mp3')
 agus_fx = pygame.mixer.Sound('assets/audio/agus_fx.mp3')
 samson_fx = pygame.mixer.Sound('assets/audio/samson_fx.mp3')
@@ -156,7 +154,7 @@ run = True
 while run:
     clock.tick(FPS)
     
-    if MENU:
+    if MENU:# Jika dalam menu utama, tampilkan latar belakang dan teks, serta periksa jika Enter ditekan untuk beralih ke menu karakter pemain
         screen.blit(menu_bg, (0, 0))
         draw_text("Press Enter to Start", smaller_menu_font, (0, 0, 0), 320, 388)
         key = pygame.key.get_pressed()
@@ -164,52 +162,51 @@ while run:
             MENU = False
             PAUSE_MENU = False
             PLAYER_CHARACTER_MENU = True
-        if END_MENU:
+        if END_MENU:  # Jika dalam menu akhir, periksa jika Enter ditekan untuk keluar dari permainan
             if key[pygame.K_RETURN]:
                 run = False
 
-    elif PLAYER_CHARACTER_MENU:
+    elif PLAYER_CHARACTER_MENU: # Jika dalam menu pemilihan karakter pemain, tampilkan latar belakang dan periksa pilihan pemain
         if not PLAYER1_SELECTED:
             screen.blit(choose1_bg, (0, 0))
 
             key = pygame.key.get_pressed()
             
-            if key[pygame.K_1]:
+            if key[pygame.K_1]: # Jika tombol 1 ditekan, pilih karakter Samson untuk pemain 1
                 pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, samson_sheet, samson_animation_steps, False, samson_fx, atr_samson)
                 pemain1_bantuan = [samson_sheet, samson_animation_steps, samson_fx]
                 pemain1_health_bar = health_bar.HealthBarSamson(pemain1.health)
                 PLAYER1_SELECTED = True
                 PLAYER1_NAME = "Samson"
 
-            elif key[pygame.K_2]:
+            elif key[pygame.K_2]:  # Jika tombol 2 ditekan, pilih karakter Ica untuk pemain 1
                 pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, ica_sheet, ica_animation_steps,False, ica_fx, atr_ica)
                 pemain1_bantuan = [ica_sheet, ica_animation_steps, ica_fx]
                 pemain1_health_bar = health_bar.HealthBarIca(pemain1.health)
                 PLAYER1_SELECTED = True
                 PLAYER1_NAME = "Ica"
                 
-            elif key[pygame.K_3]:
+            elif key[pygame.K_3]: # Jika tombol 3 ditekan, pilih karakter Agus untuk pemain 1
                 pemain1 = fighter.Fighter(1, 200, 390, pemain1_data, agus_sheet, agus_animation_steps, False, agus_fx, atr_agus)
                 pemain1_bantuan = [agus_sheet, agus_animation_steps, agus_fx]
                 pemain1_health_bar = health_bar.HealthBarAgus(pemain1.health)
                 PLAYER1_SELECTED = True
                 PLAYER1_NAME = "Agus"
                 
-        else:
+        else:  # Jika dalam menu pemilihan karakter pemain 2, tampilkan latar belakang dan periksa pilihan pemain
             screen.blit(choose2_bg, (0, 0))
 
             key = pygame.key.get_pressed()
-            
-            if key[pygame.K_q]:
+
+            if key[pygame.K_q]:  # Jika tombol Q ditekan, pilih karakter Samson untuk pemain 2
                 pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, samson_sheet, samson_animation_steps, True, samson_fx, atr_samson)
                 pemain2_bantuan = [samson_sheet, samson_animation_steps, samson_fx]
                 pemain2_health_bar = health_bar.HealthBarSamson(pemain2.health)
                 BACKGROUND_MENU = True
                 PLAYER_CHARACTER_MENU = False
                 PLAYER2_NAME = "Samson"
-                
 
-            elif key[pygame.K_w]:
+            elif key[pygame.K_w]:  # Jika tombol W ditekan, pilih karakter Ica untuk pemain 2
                 pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, ica_sheet, ica_animation_steps, True, ica_fx, atr_ica)
                 pemain2_bantuan = [ica_sheet, ica_animation_steps, ica_fx]
                 pemain2_health_bar = health_bar.HealthBarIca(pemain2.health)
@@ -217,7 +214,7 @@ while run:
                 PLAYER_CHARACTER_MENU = False
                 PLAYER2_NAME = "Ica"
 
-            elif key[pygame.K_e]:
+            elif key[pygame.K_e]:  # Jika tombol E ditekan, pilih karakter Agus untuk pemain 2
                 pemain2 = fighter.Fighter(2, 700, 390, pemain2_data, agus_sheet, agus_animation_steps, True, agus_fx, atr_agus)
                 pemain2_bantuan = [agus_sheet, agus_animation_steps, agus_fx]
                 pemain2_health_bar = health_bar.HealthBarAgus(pemain2.health)
@@ -225,7 +222,8 @@ while run:
                 PLAYER_CHARACTER_MENU = False
                 PLAYER2_NAME = "Agus"
 
-    elif BACKGROUND_MENU:
+
+    elif BACKGROUND_MENU: # Jika dalam menu pemilihan latar belakang, tampilkan latar belakang menu dan periksa pilihan pemain
         screen.blit(arena_bg, (0, 0)) 
         key = pygame.key.get_pressed()
         if key[pygame.K_1]:
@@ -237,7 +235,7 @@ while run:
             BACKGROUND_MENU = False
             MENU = False
     
-    elif PAUSE_MENU:
+    elif PAUSE_MENU:# Jika dalam menu jeda, tampilkan opsi menu, penggeser, dan periksa input untuk melanjutkan, menampilkan panduan, atau keluar
         screen.blit(option_bg, (0, 0))
         draw_text_with_outline("Press Enter to Resume", menu_font, Black, White , 240, 250)
         draw_text_with_outline("Press H for Game Guide", menu_font, Black, White, 230, 300)
@@ -246,7 +244,6 @@ while run:
         draw_text_with_outline("Sound Effects", smaller_menu_font, Black, White, 585, 400)
         bg_slider.draw(screen)
         fx_slider.draw(screen)
-        draw_text_with_outline("Press Space to Quit", menu_font, Black, White, 300, 350)
         key = pygame.key.get_pressed()
         if key[pygame.K_RETURN]:
             PAUSE_MENU = False
@@ -257,7 +254,7 @@ while run:
         elif key[pygame.K_SPACE]:
             run =False
 
-    elif GAME_GUIDE:
+    elif GAME_GUIDE: # Jika dalam menu panduan, tampilkan latar belakang panduan, opsi kembali, dan periksa input untuk kembali ke menu jeda
         screen.blit(guide_bg, (0, 0))
         draw_text_with_outline("Press Esc to Return to Pause Menu", smaller_menu_font, Black, White, 250, 500)
         key = pygame.key.get_pressed()
@@ -282,28 +279,34 @@ while run:
 
         draw_text_with_outline("P1 " + PLAYER1_NAME + " : " + str(score[0]), score_font, Black, White, 20, 60)
         draw_text_with_outline("P2 " + PLAYER2_NAME + " : " + str(score[1]), score_font, Black, White, 580, 60)
+        
         # Inisialisasi variabel game_over sebelum loop game
         game_over = False
 
-        #
+        
         if intro <= 0 and not game_over:
+            # Jika intro telah berakhir dan permainan belum berakhir, izinkan pemain untuk bergerak
             pemain1.move(Screen_Width, Screen_Height, screen, pemain2, round_over)
             pemain2.move(Screen_Width, Screen_Height, screen, pemain1, round_over)
         else:
             if not game_over:  # Hanya jika permainan belum berakhir
+                # Tampilkan hitungan mundur jika permainan belum berakhir
                 draw_text_with_outline(str(intro), count_font, Black, White, (Screen_Width / 2) - 40, (Screen_Height / 3) - 50)
                 if pygame.time.get_ticks() - last_count_update >= 1000:
                     intro -= 1
                     last_count_update = pygame.time.get_ticks()
 
-        #
+        # Perbarui status pemain dan gambar mereka pada layar
         pemain1.update()
         pemain2.update()
 
         pemain1.draw(screen)
         pemain2.draw(screen)
 
-        #
+
+        # Periksa status ronde: jika ronde belum berakhir, periksa apakah salah satu pemain telah mati.
+        # Jika salah satu pemain mati, tambahkan skor lawan dan tandai ronde berakhir.
+        # Jika ronde telah berakhir, tetapkan cooldown untuk ronde berikutnya, atur ulang pemain ke posisi awal berdasarkan karakter yang dipilih.
         if round_over == False:
             if pemain1.alive == False:
                 score[1] += 1
