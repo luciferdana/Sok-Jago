@@ -64,7 +64,7 @@ class HealthBarIca(AbstrakHealthbar): #Pewarisan, memubat kelas Anak
        #Menggambar persegi panjang merah sebagai background dari health bar
        pygame.draw.rect(screen, Red, (x, y, 400, 30))
 
-       #Menggambar persegi panjang kuning sebagai health
+       #Menggambar persegi panjang hijau sebagai health
        pygame.draw.rect(screen, Green, (x, y, 400 * self._ratio, 30))
 
 class HealthBarSamson(AbstrakHealthbar): #Pewarisan, memubat kelas Anak
@@ -86,5 +86,5 @@ class HealthBarSamson(AbstrakHealthbar): #Pewarisan, memubat kelas Anak
        #Menggambar persegi panjang merah sebagai background dari health bar
        pygame.draw.rect(screen, Red, (x, y, 400, 30))
 
-       #Menggambar persegi panjang kuning sebagai health
+       #Menggambar persegi panjang biru sebagai health
        pygame.draw.rect(screen, Blue, (x, y, 400 * self._ratio, 30))
